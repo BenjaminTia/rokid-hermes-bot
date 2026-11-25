@@ -1,6 +1,6 @@
 # Rokid Hermes Bot
 
-Talk to your own [Hermes Agent](https://hermes-agent.nousresearch.com/) from Rokid Glasses. Ask by voice, get the answer on the display and read aloud, then keep going — including **queueing the next question while the current one is still being answered**.
+Talk to your own [Hermes Agent](https://hermes-agent.nousresearch.com/) from Rokid Glasses. Ask by voice, get the answer on the display and read aloud, then keep going. including **queueing the next question while the current one is still being answered**.
 
 Derived from [flaibot/rokid-glasses-bots](https://github.com/flaibot/rokid-glasses-bots) (MIT), with a working setup on Windows and a small set of fixes and additions described below.
 
