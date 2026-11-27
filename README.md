@@ -13,6 +13,8 @@ This independent project is derived from [flaibot/rokid-glasses-bots](https://gi
 
 ## Status and limitations
 
+**Experimental branch:** ordinary graph requests are routed to AIUI's native chart component rather than image generation. Mathematical expressions are requested in TeX by default. These changes have been exercised with the running Hermes API and automated tests, but this exact branch has not been tested on physical glasses. Model compliance, numerical accuracy and display layout are not guaranteed.
+
 The maintainer has reported seeing image, equation and graph visuals on Rokid Glasses. Visuals remain experimental: rendering and recognizer support depend on the installed AIUI runtime, and an assistant may not always return a valid visual. Native graphs and LaTeX depend on structured model output; chart values should be independently checked.
 
 The glasses use AIUI's `SpeechRecognition` and send recognised text to Hermes. The app does not itself call Deepgram; the runtime's recognition provider is not identified here. Hermes gateway voice-message transcription is a separate configuration.

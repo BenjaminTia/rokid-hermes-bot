@@ -8,7 +8,8 @@ const png = Buffer.from([137,80,78,71,13,10,26,10,0,0,0,0]).toString('base64');
 
 test('explicit visual questions route correctly and paths are hidden', () => {
   assert.equal(wantsImage('Show me a photo of a robot'), true);
-  assert.equal(wantsImage('Plot a graph of y squared'), true);
+  assert.equal(wantsImage('Plot a graph of y squared'), false);
+  assert.equal(wantsImage('Show an image of a graph'), true);
   assert.equal(wantsImage('Explain the equation'), false);
   assert.doesNotMatch(safeReply('Here\nMEDIA:C:\\private\\image.png'), /private/);
 });

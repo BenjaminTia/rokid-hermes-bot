@@ -10,7 +10,7 @@ test('real page accepts a streamed chart and removes machine payload from reply'
   if(req.method==='GET'&&r.path===`/v1/runs/${id}/events`){sseHeaders(res);res.write(sseFrame(1,runEvent(id,1,'message.delta',{delta:output})));res.write(sseFrame(2,runEvent(id,2,'run.completed',{output})));res.end();return;}
   res.writeHead(404).end('{}');
  });t.after(()=>gw.close());installStorage({'hermes.settings':settingsFor(gw.base)});installScanner();const page=makePage(def);page.onLoad({});
- await page.send('Explain the three measured values');assert.equal(page.data.visualType,'chart');assert.equal(page.data.visualCaption,'Sample 1-3: volts');assert.deepEqual(page.data.visualPoints,[{value:1},{value:2},{value:3}]);assert.equal(page.data.answer,'Three measured values.');
+ await page.send('Explain the three measured values');assert.equal(page.data.visualType,'chart');assert.equal(page.data.visualCaption,'Sample 1-3: volts');assert.deepEqual(page.data.visualPoints,[{x:0,value:1},{x:1,value:2},{x:2,value:3}]);assert.equal(page.data.answer,'Three measured values.');
 });
 
 test('real page accepts a streamed formula and never stores its wire payload as spoken text',async t=>{

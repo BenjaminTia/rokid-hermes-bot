@@ -151,7 +151,7 @@ function isLaunchPhrase(text) {
 
 export default {
   data: {
-    version: `v${VERSION}-V4R`,
+    version: `v${VERSION}-V5N`,
     state: 'idle',
     hint: HINT.idle,
     question: '',
@@ -984,7 +984,7 @@ export default {
       </view>
       <view class="answer-box" ink:elif="{{visualType === 'chart'}}">
         <text class="sline">{{visualCaption}}</text>
-        <chart class="visual-chart" type="line" series="value" data="{{visualPoints}}"></chart>
+        <chart class="visual-chart" type="line" series='[{"xName":"x","yName":"value","smooth":false}]' data="{{visualPoints}}"></chart>
       </view>
       <view class="answer-box" ink:elif="{{visualType === 'formula'}}">
         <formula style="display: block;">{{visualFormula}}</formula>

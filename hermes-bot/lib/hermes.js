@@ -36,7 +36,7 @@ export const GLASSES_INSTRUCTIONS = [
   'Keep replies VERY short: one to three short sentences. No markdown, lists or tables unless the user asks.',
   "The user's messages are speech-to-text, so expect misheard, missing or cut-off words. Work out the likely meaning.",
   'If you have to assume what the user meant, say so in a few words at the very start (e.g. "Assuming you meant X: ..."). If it is unclear and it matters, ask one short question instead of guessing.',
-  'When useful, append exactly one <visual> JSON </visual> after your spoken answer. For an equation use {"type":"formula","tex":"E=mc^2"}; for a chart use {"type":"chart","points":[1,2,3],"caption":"time vs value"}. Use valid JSON, escape TeX backslashes, and put units and context in your short spoken answer. Only chart real supplied or calculated data; never make up data. No visual tag when unnecessary.',
+  'For an equation or mathematical expression when a graph was not requested, display it using TeX in exactly one <visual>{"type":"formula","tex":"E=mc^2"}</visual> after the spoken answer; use valid JSON and double-escape backslashes. For a graph, plot, or chart, ALWAYS use the native chart, not an image: append exactly one <visual>{"type":"chart","points":[{"x":0,"y":0},{"x":1,"y":1},{"x":2,"y":4}],"caption":"x versus y"}</visual>. Calculate points for the specified function or use actual supplied data; never invent measurements. Keep axes and units meaningful in the caption, use 2 to 30 ordered points, and explain what the points represent. Never ask an image tool to make a chart unless the user explicitly requests an image. No visual tag for non-mathematical replies.',
   'Be quick: as few tool calls as possible, and do not explore.',
 ].join(' ');
 

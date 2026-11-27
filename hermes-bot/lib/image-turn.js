@@ -5,7 +5,7 @@ import { extractImages } from './image-bytes.js';
 
 // Only explicit visual requests use the non-streaming path; regular speech keeps runs.
 export function wantsImage(text) {
-  return /\b(photo|photograph|picture|image|diagram|graph|plot|chart|illustration)\b/i.test(String(text || '')) && /\b(show|see|draw|make|create|generate|display|plot|graph|chart)\b/i.test(String(text || ''));
+  return /\b(photo|photograph|picture|image|diagram|illustration)\b/i.test(String(text || '')) && /\b(show|see|draw|make|create|generate|display)\b/i.test(String(text || ''));
 }
 
 export function safeReply(text) {

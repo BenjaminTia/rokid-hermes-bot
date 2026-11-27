@@ -19,9 +19,12 @@ export function splitVisual(reply) {
     if (p.type === 'formula' && typeof p.tex === 'string' && p.tex.trim().length > 0 && p.tex.length <= 200) {
       return { text, visual: { type: 'formula', tex: p.tex.trim() } };
     }
-    if (p.type === 'chart' && Array.isArray(p.points) && p.points.length >= 2 && p.points.length <= 30 &&
-        p.points.every(n => typeof n === 'number' && Number.isFinite(n) && Math.abs(n) <= 1e9)) {
-      return { text, visual: { type: 'chart', points: p.points.map(value => ({ value })), caption: typeof p.caption === 'string' ? p.caption.slice(0, 60) : '' } };
+    const finite = n => typeof n === 'number' && Number.isFinite(n) && Math.abs(n) <= 1e9;
+    if (p.type === 'chart' && Array.isArray(p.points) && p.points.length >= 2 && p.points.length <= 30) {
+      const points = p.points.map((point, index) => typeof point === 'number'
+        ? { x: index, value: point } : { x: point?.x, value: point?.y });
+      if (points.every(point => finite(point.x) && finite(point.value)))
+        return { text, visual: { type: 'chart', points, caption: typeof p.caption === 'string' ? p.caption.slice(0, 60) : '' } };
     }
   } catch (_) { /* invalid payload is not displayed */ }
   return { text, visual: null };
