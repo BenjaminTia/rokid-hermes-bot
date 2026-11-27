@@ -3,3 +3,11 @@
 *.aix
 .aix/
 config.js
+# Prototype scaffolding: never shipped inside the .aix
+/package.json
+/test/
+/docs/
+/artifacts/
+/pages/status/
+/lib/status-demo.js
+/test-results.log

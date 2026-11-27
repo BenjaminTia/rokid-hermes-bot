@@ -1,87 +1,39 @@
 # Rokid Hermes Bot
 
-Talk to your own [Hermes Agent](https://hermes-agent.nousresearch.com/) from Rokid Glasses. Ask by voice, get the answer on the display and read aloud, then keep going. A next-question queue is present but experimental; its known defects are listed below.
+A voice interface for your own [Hermes Agent](https://hermes-agent.nousresearch.com/) on Rokid Glasses. Speak to Hermes, hear its reply and view text, images, equations or simple charts on the glasses.
 
-Derived from [flaibot/rokid-glasses-bots](https://github.com/flaibot/rokid-glasses-bots) (MIT), with Windows setup notes and a small set of fixes and additions described below.
+This independent project is derived from [flaibot/rokid-glasses-bots](https://github.com/flaibot/rokid-glasses-bots), under its MIT licence. It adds a Windows pairing helper, a revised QR scanner, conversational controls, a question queue and experimental visual delivery. The original licence and third-party notices remain in this repository.
 
-```
-Rokid Glasses ──Bluetooth──▶ Hi Rokid app on the phone ──Tailscale──▶ your PC
-                                                                      └─ Hermes API server (127.0.0.1:8642)
-```
+## Features
 
-## What it does
+- Voice conversation, on-device history, Fast and Smart modes, and a menu.
+- Tap while a reply is processing to queue a follow-up; swipe to stop the running request.
+- A QR scanner using the native barcode detector, plus a Windows pairing helper.
+- Experimental images through an authenticated Hermes connection, and native chart and TeX formula components.
 
-| You do | It does |
-|---|---|
-| "Hi Rokid, open Hermes Bot" | Opens on your last exchange and starts listening. |
-| Speak | Sends after ~3 seconds of quiet. |
-| Tap the temple | Talk now · send now · add another question to the queue (experimental) · interrupt a spoken reply. |
-| Swipe | Next page of a long reply, earlier exchanges, or the menu. |
-| Swipe while it is thinking | Cancels the request and any held questions. While the second capture is open, it cancels just that capture. |
+## Status and limitations
 
-Replies come back short and unformatted, because they are read aloud on a monochrome display.
+The maintainer has reported seeing image, equation and graph visuals on Rokid Glasses. Visuals remain experimental: rendering and recognizer support depend on the installed AIUI runtime, and an assistant may not always return a valid visual. Native graphs and LaTeX depend on structured model output; chart values should be independently checked.
 
-## What this fork changes
+The glasses use AIUI's `SpeechRecognition` and send recognised text to Hermes. The app does not itself call Deepgram; the runtime's recognition provider is not identified here. Hermes gateway voice-message transcription is a separate configuration.
 
-**1. Setup QR scanner reworked.** Upstream hands the camera's WebP frame to a pure-JavaScript decoder (`decodeWebP`, webpjs, built with `new Function`) before the native `BarcodeDetector` sees it. The upstream scanner mounts the camera before the scan tap. A related WhatsApp scanner fix reports that the JavaScript decode can block; the precise cause of the Hermes scanner's failures has not been confirmed. This fork follows the technique in [upstream PR #1](https://github.com/flaibot/rokid-glasses-bots/pull/1): pass the encoded camera image straight to `BarcodeDetector` as a `Blob`, capture with `mode: 'wide'` and a system preview, and add 15-second capture and detection timeouts plus overlapping-tap and stale-result guards. PR #1 changes only `whatsapp-bot`, so Hermes Bot still has the old path on upstream `main`.
+Image requests use a non-streaming authenticated endpoint. They are limited to supported, bounded image data and are not saved in local conversation history. A stopped image request may continue on the server. The API key grants access to your agent and tools; the gateway's media-path rules do not eliminate prompt-injection or unintended image-disclosure risks. Use only on devices and networks you trust.
 
-**2. Next-question queue (experimental; not finished).** Tapping while a reply is being worked out starts a second capture, holds what you say, and sends it after the current reply. Two defects are known and reproducible at mock level:
+## Setup
 
-- Swiping away from the second capture calls `stopListening(true)`, which aborts the microphone and clears `recognition` but leaves `queueListening` set. The next tap then calls `stopListening(false)`, which no-ops, so the microphone cannot be reopened until the page is reopened.
-- If the in-flight reply finishes while the second capture is still open, `drainQueue()` runs against an empty queue and the page goes idle. A question delivered afterwards is appended to the queue but never sent.
+1. Configure the Hermes API server to listen on `127.0.0.1` with a strong unique API key. Follow the [Hermes documentation](https://hermes-agent.nousresearch.com/docs/) for your platform.
+2. Make the API reachable only to your authorised devices. For example, expose loopback to your private Tailscale network:
 
-The queue is not part of any upstream PR, and neither defect has been fixed in this revision. Treat the queue as unusable for now.
-
-**3. Windows server.** The upstream tooling assumes macOS (`zsh`, `qrencode`, Preview). A small Python script replaces the QR helper, writes the same payload, and shows it in a window for the glasses to scan.
-
-## Verification status
-
-- Setup scanner: covered by a mock test harness (8 checks). The same Blob/native-detector approach was used on Rokid Glasses in an earlier local build; this exact revision has not had a separate hardware run.
-- Queue: the mock queue harness reproduces both defects above. No hardware verification.
-- Windows QR helper: writes the documented payload using Tkinter and `qrcode`; no hardware claim is made for it.
-
-## Set up
-
-**PC side**
-
-1. Turn on Hermes' API server, bound to loopback only:
-
-   ```
-   API_SERVER_ENABLED=true
-   API_SERVER_HOST=127.0.0.1
-   API_SERVER_PORT=8642
-   API_SERVER_KEY=<openssl rand -hex 32>
-   ```
-
-   Restart the Hermes gateway afterwards.
-
-2. Expose it to your tailnet only:
-
-   ```
+   ```sh
    tailscale serve --bg --http=8461 http://127.0.0.1:8642
    ```
 
-3. Show the pairing code with your own tailnet name:
+   This example uses HTTP within the tailnet, not public HTTPS. Check the security requirements of your deployment.
+3. Run `python rokid-utils/hermes-bot-qr-windows.py` on Windows to display the pairing QR. The QR contains the API key. Keep it private and never commit it.
+4. In AIUI Studio, import the `hermes-bot` folder, then choose **Device Debug → Package and Save**. On the glasses, select **Settings → Developer → AIUI → Update glasses resources**. Open Hermes Bot and scan the QR.
 
-   ```
-   python rokid-utils/hermes-bot-qr-windows.py
-   ```
+See [the bot README](hermes-bot/README.md) for controls and tests. No APK, USB cable, ADB or store submission is required for this development route.
 
-   The payload is `{"hermes": "http://<machine>.<tailnet>.ts.net:8461", "key": "<API_SERVER_KEY>"}`. It contains the key, so show it only to your glasses.
+## Credits and licences
 
-**Glasses side** (no cable, no ADB)
-
-1. AIUI Studio → **New Agent → Import from local folder** → the `hermes-bot` folder.
-2. **Device Debug → Package and Save** (this only packages for your own glasses, it does not submit anything).
-3. On the glasses: **Settings → Developer → AIUI → Update glasses resources**.
-4. Open Hermes Bot, scan the QR, ask something.
-
-Keep the glasses' Wi-Fi **off** during setup: with Wi-Fi off the requests travel through the Hi Rokid app on the phone and your tailnet, which is the path Tailscale can carry.
-
-## Notes on the key
-
-The API server key gives access to your agent and all of its tools. It is stored on the glasses after pairing, never inside the app package. Rotate it by changing `API_SERVER_KEY`, restarting the gateway, and rescanning.
-
-## Credits
-
-Built on [flaibot/rokid-glasses-bots](https://github.com/flaibot/rokid-glasses-bots), which supplies the Hermes, Claude and WhatsApp bots and the iPhone-free install route. The setup-scanner approach follows [upstream PR #1](https://github.com/flaibot/rokid-glasses-bots/pull/1) by [@ShaBP](https://github.com/ShaBP); the diagnosis and technique are the PR author's, and this fork applies them to Hermes Bot. Upstream is MIT licensed; the original `LICENSE` and `THIRD_PARTY_NOTICES.md` are unchanged. This is an unofficial project, not affiliated with Rokid, Nous Research or Tailscale.
+Based on [flaibot/rokid-glasses-bots](https://github.com/flaibot/rokid-glasses-bots). The native QR scanning approach follows [upstream PR #1](https://github.com/flaibot/rokid-glasses-bots/pull/1) by [@ShaBP](https://github.com/ShaBP). See [LICENSE](LICENSE) and [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). This is an unofficial project, not affiliated with Rokid, Nous Research or Tailscale.

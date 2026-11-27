@@ -1,7 +1,7 @@
 # Agent: Hermes Bot
 
-- **Version**: 0.9.2
-- **Description**: Talk to your own Hermes agent from Rokid Glasses. Speech goes to the Hermes API server over the tailnet; the streamed reply is shown on the display and read aloud.
+- **Version**: 0.9.3
+- **Description**: Talk to your own Hermes agent from Rokid Glasses. The AIUI host recognises speech; the resulting text goes to the Hermes API server. The streamed reply is displayed and read aloud.
 - **Author**: Rokid Glasses bots contributors
 
 ## Capabilities
